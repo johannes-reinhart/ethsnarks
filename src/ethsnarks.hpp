@@ -1,18 +1,20 @@
 #ifndef ETHSNARKS_HPP_
 #define ETHSNARKS_HPP_
 
-#include <libff/algebra/curves/alt_bn128/alt_bn128_pp.hpp>
+#include <libff/common/default_types/ec_pp.hpp>
 #include <libsnark/gadgetlib1/protoboard.hpp>
 #include <libsnark/gadgetlib1/gadget.hpp>
 #include "r1cs_gg_ppzksnark_zok/r1cs_gg_ppzksnark_zok.hpp"
 
+#include "inner_ec_pp.hpp"
 
 namespace ethsnarks {
 
-typedef libff::bigint<libff::alt_bn128_r_limbs> LimbT;
-typedef libff::alt_bn128_G1 G1T;
-typedef libff::alt_bn128_G2 G2T;
-typedef libff::alt_bn128_pp ppT;
+typedef libff::bigint<libff::default_ec_pp::Fp_type::num_limbs> LimbT;
+typedef libff::default_ec_pp::G1_type G1T;
+typedef libff::default_ec_pp::G2_type G2T;
+typedef libff::default_ec_pp ppT;
+
 typedef libff::Fq<ppT> FqT;
 typedef libff::Fr<ppT> FieldT;
 typedef libsnark::r1cs_constraint<FieldT> ConstraintT;

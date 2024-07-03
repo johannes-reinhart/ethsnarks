@@ -8,7 +8,6 @@ namespace ethsnarks {
 
 namespace jubjub {
 
-
 class Params {
 public:
     // Base point
@@ -24,13 +23,26 @@ public:
     const FieldT scale;
 
     Params() :
-        Gx("16540640123574156134436876038791482806971768689494387082833631921987005038935"),
-        Gy("20819045374670962167435360035096875258406992893633759881276124905556507972311"),
-        a("168700"),
-        d("168696"),
-        A("168698"),
+        Gx(default_inner_ec_pp::inner2outer(libff::G1<default_inner_ec_pp>::G1_one.Y)), // G1 is in inverted coordinates
+        Gy(default_inner_ec_pp::inner2outer(libff::G1<default_inner_ec_pp>::G1_one.X)),
+        a(default_inner_ec_pp::inner2outer(libff::G1<default_inner_ec_pp>::coeff_a)),
+        d(default_inner_ec_pp::inner2outer(libff::G1<default_inner_ec_pp>::coeff_d)),
+        A(default_inner_ec_pp::inner2outer(libff::G1<default_inner_ec_pp>::coeff_a - 2)),
         scale("1")
-    {}
+            {
+//#ifdef DEBUG
+//                std::cout << "Params (Jubjub)" << std::endl;
+//                std::cout << "Gx " << Gx << std::endl;
+//                std::cout << "Gy " << Gy << std::endl;
+//                std::cout << "a " << a << std::endl;
+//                std::cout << "d " << d << std::endl;
+//                std::cout << "A " << A << std::endl;
+//                std::cout << "scale " << scale << std::endl;
+//#endif
+                assert(libff::G1<default_inner_ec_pp>::initialized);
+                assert(libff::G1<default_inner_ec_pp>::G1_one.Z == libff::G1<default_inner_ec_pp>::G1_one.X*libff::G1<default_inner_ec_pp>::G1_one.Y);
+                assert(d == A - 2);
+            }
 };
 
 

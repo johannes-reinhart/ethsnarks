@@ -43,8 +43,8 @@ References:
 * @copyright  MIT license (see LICENSE file)
 *****************************************************************************/
 
-#ifndef R1CS_GG_PPZKSNARK_HPP_
-#define R1CS_GG_PPZKSNARK_HPP_
+#ifndef R1CS_GG_PPZKSNARK_ZOK_HPP_
+#define R1CS_GG_PPZKSNARK_ZOK_HPP_
 
 #include <memory>
 
@@ -135,13 +135,16 @@ public:
 
     size_t size_in_bits() const
     {
-        return (libff::size_in_bits(A_query) + B_query.size_in_bits() +
-                libff::size_in_bits(H_query) + libff::size_in_bits(L_query) +
+        return (libff::curve_size_in_bits(A_query) + B_query.size_in_bits() +
+                libff::curve_size_in_bits(H_query) + libff::curve_size_in_bits(L_query) +
                 1 * libff::G1<ppT>::size_in_bits() + 1 * libff::G2<ppT>::size_in_bits());
     }
 
     void print_size() const
     {
+        if(libff::inhibit_profiling_info) {
+            return;
+        }
         libff::print_indent(); printf("* G1 elements in PK: %zu\n", this->G1_size());
         libff::print_indent(); printf("* Non-zero G1 elements in PK: %zu\n", this->G1_sparse_size());
         libff::print_indent(); printf("* G2 elements in PK: %zu\n", this->G2_size());
@@ -214,6 +217,9 @@ public:
 
     void print_size() const
     {
+        if(libff::inhibit_profiling_info) {
+            return;
+        }
         libff::print_indent(); printf("* G1 elements in VK: %zu\n", this->G1_size());
         libff::print_indent(); printf("* G2 elements in VK: %zu\n", this->G2_size());
         libff::print_indent(); printf("* GT elements in VK: %zu\n", this->GT_size());
@@ -342,6 +348,9 @@ public:
 
     void print_size() const
     {
+        if(libff::inhibit_profiling_info) {
+            return;
+        }
         libff::print_indent(); printf("* G1 elements in proof: %zu\n", this->G1_size());
         libff::print_indent(); printf("* G2 elements in proof: %zu\n", this->G2_size());
         libff::print_indent(); printf("* Proof size in bits: %zu\n", this->size_in_bits());
@@ -463,4 +472,4 @@ bool r1cs_gg_ppzksnark_zok_affine_verifier_weak_IC(const r1cs_gg_ppzksnark_zok_v
 
 #include "r1cs_gg_ppzksnark_zok/r1cs_gg_ppzksnark_zok.tcc"
 
-#endif // R1CS_GG_PPZKSNARK_HPP_
+#endif // R1CS_GG_PPZKSNARK_ZOK_HPP_

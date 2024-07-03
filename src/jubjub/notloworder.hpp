@@ -5,7 +5,7 @@
 // License: LGPL-3.0+
 
 #include "ethsnarks.hpp"
-#include "gadgets/isnonzero.hpp"
+#include "gadgets/assertnonzero.hpp"
 #include "jubjub/doubler.hpp"
 
 namespace ethsnarks {
@@ -35,7 +35,8 @@ public:
 	PointDoubler m_doubler_2;
 	PointDoubler m_doubler_4;
 	PointDoubler m_doubler_8;
-	IsNonZero m_isnonzero;
+	//IsNonZero m_isnonzero;
+    AssertNonZero m_isnonzero;
 
 	NotLowOrder(
 		ProtoboardT& in_pb,

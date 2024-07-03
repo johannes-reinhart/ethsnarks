@@ -12,7 +12,7 @@
 namespace ethsnarks {
 
 
-std::string HexStringFromBigint(libff::bigint<libff::alt_bn128_r_limbs> _x){
+std::string HexStringFromBigint(LimbT _x){
     mpz_t value;
     ::mpz_init(value);
 

@@ -50,6 +50,9 @@ namespace jubjub {
 * Where %1 = alpha
 *       %2 = beta
 *       %3 = gamma
+ *
+ *  JR: Reduced to 5 constraints as in ZCash specification A 3.3.5
+ *
 */
 class PointDoubler : public GadgetT {
 public:
@@ -60,10 +63,12 @@ public:
     const VariableT m_Y1;
 
     // Intermediate variables
-    const VariableT m_alpha;
+    //const VariableT m_alpha;
     const VariableT m_beta;
-    const VariableT m_gamma;
-    const VariableT m_delta;
+    //const VariableT m_gamma;
+    const VariableT m_rho;
+    //const VariableT m_delta;
+    const VariableT m_tau;
     const VariableT m_X3;
     const VariableT m_Y3;
 

@@ -13,9 +13,9 @@ field2bits_strict::field2bits_strict(
     const std::string& annotation_prefix
 ) :
     GadgetT(in_pb, annotation_prefix),
-    m_bits(make_var_array(in_pb, FieldT::size_in_bits(), FMT(this->annotation_prefix, ".result"))),
+    m_bits(make_var_array(in_pb, FieldT::ceil_size_in_bits(), FMT(this->annotation_prefix, ".result"))),
     m_packer(in_pb, m_bits, in_field_element, FMT(this->annotation_prefix, ".packer")),
-    m_results(make_var_array(in_pb, FieldT::size_in_bits() - 1, FMT(this->annotation_prefix, ".results")))
+    m_results(make_var_array(in_pb, FieldT::ceil_size_in_bits() - 1, FMT(this->annotation_prefix, ".results")))
 {
     // Constant bit is 0
     const std::vector<FieldT> table_cmp_0 = {
@@ -31,7 +31,7 @@ field2bits_strict::field2bits_strict(
 
     const auto largest_value = (FieldT(FieldT::mod) - 1).as_bigint();
 
-    for( size_t i = 0; i < FieldT::size_in_bits(); i++ )
+    for( size_t i = 0; i < FieldT::ceil_size_in_bits(); i++ )
     {
         if( largest_value.test_bit(i) )
         {
@@ -54,7 +54,7 @@ void field2bits_strict::generate_r1cs_constraints ()
     }
 
     // AND all of the comparisons
-    auto last_bit = int(FieldT::size_in_bits() - 1);
+    auto last_bit = int(FieldT::ceil_size_in_bits() - 1);
     for( int i = last_bit; i > 0; i-- )
     {
         if( i == last_bit )
@@ -82,7 +82,7 @@ void field2bits_strict::generate_r1cs_witness ()
     }
 
     // Iterate from MSB to LSB
-    auto last_bit = (FieldT::size_in_bits() - 1);
+    auto last_bit = (FieldT::ceil_size_in_bits() - 1);
     for( size_t i = last_bit; i > 0; i-- )
     {
         // current * previous = result

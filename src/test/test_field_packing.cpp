@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <libff/algebra/fields/field_utils.hpp>
+#include <libff/algebra/field_utils/field_utils.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_components.hpp>  // digest size
 
 #include "utils.hpp"

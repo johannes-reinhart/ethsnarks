@@ -67,7 +67,7 @@ static void poseidon_constants_fill(const std::string &seed, unsigned n_constant
 {
 	blake2b_ctx ctx;
 
-	const unsigned n_bits_roundedup = FieldT::size_in_bits() + (8 - (FieldT::size_in_bits()%8));
+	const unsigned n_bits_roundedup = FieldT::ceil_size_in_bits() + (8 - (FieldT::ceil_size_in_bits()%8));
 	const unsigned output_size = n_bits_roundedup / 8;
 	uint8_t output[output_size];
 

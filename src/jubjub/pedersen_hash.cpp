@@ -7,7 +7,8 @@ namespace ethsnarks {
 
 namespace jubjub {
 
-
+// Warning: this padding scheme (and maybe other elements of the pedersen hash)
+// make it unsecure, when not restricted to fixed message lengths
 PedersenHash::PedersenHash(
     ProtoboardT& in_pb,
     const Params& in_params,
@@ -15,36 +16,47 @@ PedersenHash::PedersenHash(
     const VariableArrayT& in_bits,
     const std::string& annotation_prefix
 ) :
-    GadgetT(in_pb, annotation_prefix),
-    m_commitment(
-        in_pb, in_params,
-        EdwardsPoint::make_basepoints(name, fixed_base_mul_zcash::basepoints_required(in_bits.size()), in_params),
-        in_bits,
-        FMT(annotation_prefix, ".commitment"))
-{}
+    GadgetT(in_pb, annotation_prefix)
+{
+
+    // Pad in_bits
+    int num_pbs = (3 - in_bits.size() % 3) % 3;
+    if (num_pbs > 0){
+        libff::bit_vector padding(num_pbs, false);
+        VariableArrayT padding_bits = VariableArray_from_bits(in_pb, padding, FMT(this->annotation_prefix, ".padding"));
+        padded_bits = flatten({in_bits, padding_bits});
+    }else{
+        padded_bits = in_bits;
+    }
+
+    m_commitment.reset(new fixed_base_mul_zcash( in_pb, in_params,
+        EdwardsPoint::make_basepoints(name, fixed_base_mul_zcash::basepoints_required(padded_bits.size()), in_params),
+        padded_bits,
+        FMT(annotation_prefix, ".commitment")));
+}
 
 
 const VariableT& PedersenHash::result_x() const
 {
-    return m_commitment.result_x();
+    return m_commitment->result_x();
 }
 
 
 const VariableT& PedersenHash::result_y() const
 {
-    return m_commitment.result_y();
+    return m_commitment->result_y();
 }
 
 
 void PedersenHash::generate_r1cs_constraints ()
 {
-    m_commitment.generate_r1cs_constraints();
+    m_commitment->generate_r1cs_constraints();
 }
 
 
 void PedersenHash::generate_r1cs_witness ()
 {
-    m_commitment.generate_r1cs_witness();
+    m_commitment->generate_r1cs_witness();
 }
 
 

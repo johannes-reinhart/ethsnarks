@@ -14,9 +14,9 @@ MontgomeryAdder::MontgomeryAdder(
     ProtoboardT& in_pb,
     const Params& in_params,
     const LinearCombinationT in_X1,
-    const VariableT in_Y1,
+    const LinearCombinationT in_Y1,
     const LinearCombinationT in_X2,
-    const VariableT in_Y2,
+    const LinearCombinationT in_Y2,
     const std::string &annotation_prefix
 ) :
     GadgetT(in_pb, annotation_prefix),
@@ -53,9 +53,9 @@ const VariableT& MontgomeryAdder::result_y() const
 
 void MontgomeryAdder::generate_r1cs_witness()
 {
-    this->pb.val(lambda) = (this->pb.val(m_Y2) - this->pb.val(m_Y1)) * (this->pb.lc_val(m_X2) - this->pb.lc_val(m_X1)).inverse();
+    this->pb.val(lambda) = (this->pb.lc_val(m_Y2) - this->pb.lc_val(m_Y1)) * (this->pb.lc_val(m_X2) - this->pb.lc_val(m_X1)).inverse();
     this->pb.val(m_X3) = this->pb.val(lambda).squared() - m_params.A - this->pb.lc_val(m_X1) - this->pb.lc_val(m_X2);
-    this->pb.val(m_Y3) = -(this->pb.val(m_Y1) + (this->pb.val(lambda)*(this->pb.val(m_X3) - this->pb.lc_val(m_X1))));
+    this->pb.val(m_Y3) = -(this->pb.lc_val(m_Y1) + (this->pb.lc_val(lambda)*(this->pb.lc_val(m_X3) - this->pb.lc_val(m_X1))));
 }
 
 

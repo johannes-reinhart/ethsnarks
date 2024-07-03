@@ -64,7 +64,7 @@ void sha256_many::generate_r1cs_witness()
 {
     for( size_t i = 0; i < m_hashers.size(); i++ )
     {
-        auto is_last = i == (m_hashers.size() - 1);
+        //auto is_last = i == (m_hashers.size() - 1);
 
         m_hashers[i].generate_r1cs_witness();
     }

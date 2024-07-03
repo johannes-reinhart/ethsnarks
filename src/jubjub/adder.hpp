@@ -17,18 +17,19 @@ public:
     const Params& m_params;
 
     // First input point
-    const VariableT m_X1;
-    const VariableT m_Y1;
+    const LinearCombinationT m_X1;
+    const LinearCombinationT m_Y1;
 
     // Second input point
-    const VariableT m_X2;
-    const VariableT m_Y2;
+    const LinearCombinationT m_X2;
+    const LinearCombinationT m_Y2;
 
     // Intermediate variables
     const VariableT m_beta;
     const VariableT m_gamma;
-    const VariableT m_delta;
-    const VariableT m_epsilon;
+    //const VariableT m_delta;
+    //const VariableT m_epsilon;
+    const VariableT m_rho;
     const VariableT m_tau;
     const VariableT m_X3;
     const VariableT m_Y3;
@@ -36,10 +37,10 @@ public:
     PointAdder(
         ProtoboardT& in_pb,
         const Params& in_params,
-        const VariableT in_X1,
-        const VariableT in_Y1,
-        const VariableT in_X2,
-        const VariableT in_Y2,
+        const LinearCombinationT in_X1,
+        const LinearCombinationT in_Y1,
+        const LinearCombinationT in_X2,
+        const LinearCombinationT in_Y2,
         const std::string& annotation_prefix
     );
 

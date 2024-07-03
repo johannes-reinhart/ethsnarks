@@ -1,9 +1,8 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
+#include <openssl/sha.h>
 #include "jubjub/point.hpp"
 #include "utils.hpp"
-#include "crypto/sha256.h"
 
 using libff::bigint;
 
@@ -74,14 +73,22 @@ const EdwardsPoint EdwardsPoint::from_hash( void *in_bytes, size_t n, const Para
         0,                          // nails
         output_digest);             // op
 
+    // On nano_jubjub, the scalar field is too small to fit the whole digest,
+    // so we take the digest modulo the scalar field size
+    mpz_t output_mod;
+    mpz_t d;
+    mpz_init(output_mod); mpz_init(d);
+    FieldT::mod.to_mpz(d);
+    mpz_mod(output_mod, output_as_mpz, d);
+
     // Then convert to bigint
-    const bigint<FieldT::num_limbs> y_bigint(output_as_mpz);
+    const bigint<FieldT::num_limbs> y_bigint(output_mod);
     const FieldT y(y_bigint);
 
     // Finally derive point from that coordinate
     const auto result = from_y_always(y, params);
     mpz_clear(output_as_mpz);
-
+    mpz_clear(output_mod); mpz_clear(d);
     // Multiply point by cofactor, ensures it's on the prime-order subgroup
     return result.dbl(params).dbl(params).dbl(params);
 }
@@ -145,14 +152,16 @@ const MontgomeryPoint EdwardsPoint::as_montgomery(const Params& in_params) const
 
 const EdwardsPoint EdwardsPoint::make_basepoint(const char *name, unsigned int sequence, const Params& in_params)
 {
+#ifndef NDEBUG
     unsigned int name_sz = ::strlen(name);
+#endif
     assert( name_sz <= 28 );
     assert( sequence <= 0xFFFF );
 
     // At most 28 characters of name
     // Suffixed with the sequence number as a 16bit hexadecimal
     char data[33];
-    ::sprintf(data, "%-28s%04X", name, sequence);
+    ::sprintf(data, "%-28s%04hX", name, sequence);
 
     return EdwardsPoint::from_hash(data, 32, in_params);
 }

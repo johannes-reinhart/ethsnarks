@@ -67,7 +67,8 @@ vector<FieldT> create_F_list( const json &in_tree )
 */
 G1T create_G1(const string &in_X, const string &in_Y)
 {
-    return G1T(parse_Fq(in_X), parse_Fq(in_Y), FqT("1"));
+    //return G1T(parse_Fq(in_X), parse_Fq(in_Y), FqT("1"));
+    return G1T(parse_Fq(in_X), parse_Fq(in_Y));
 
     // TODO: verify well_formed
 }
@@ -84,11 +85,14 @@ G2T create_G2(const string &in_X_c1, const string &in_X_c0, const string &in_Y_c
 {
     typedef typename ppT::Fqe_type Fq2_T;
 
+#ifdef CURVE_ALT_BN128
     return G2T(
         Fq2_T(parse_Fq(in_X_c0), parse_Fq(in_X_c1)),
-        Fq2_T(parse_Fq(in_Y_c0), parse_Fq(in_Y_c1)),
-        Fq2_T(FqT("1"), FqT("0")));   // Z is hard-coded, coordinates are affine
-
+        Fq2_T(parse_Fq(in_Y_c0), parse_Fq(in_Y_c1)));
+        //Fq2_T(FqT("1"), FqT("0")));   // Z is hard-coded, coordinates are affine
+#else
+    throw std::logic_error("Not implemented");
+#endif
     // TODO: verify well_formed
 }
 

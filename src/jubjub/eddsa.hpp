@@ -12,6 +12,7 @@
 #include "jubjub/validator.hpp"
 #include "jubjub/point.hpp"
 #include "jubjub/pedersen_hash.hpp"
+#include "gadgets/poseidon_orig.hpp"
 #include "jubjub/scalarmult.hpp"
 #include "jubjub/fixed_base_mul.hpp"
 #include "jubjub/adder.hpp"
@@ -65,7 +66,7 @@ bool eddsa_open(
     const auto msg_var_bits = make_var_array(pb, msg.size(), "msg_var_bits");
     msg_var_bits.fill_with_bits(pb, msg);
 
-    const auto s_var_bits = make_var_array(pb, FieldT::size_in_bits(), "s_var_bits");
+    const auto s_var_bits = make_var_array(pb, FieldT::ceil_size_in_bits(), "s_var_bits");
     s_var_bits.fill_with_bits_of_field_element(pb, sig.s);
 
     T the_gadget(pb, params,
@@ -132,6 +133,26 @@ public:
     const VariableArrayT& result();
 };
 
+class EdDSA_HashRAM_Poseidon_gadget : public GadgetT
+{
+public:
+    LinearCombinationArrayT m_RAM;
+    PoseidonHashToBits m_hash_RAM;          // hash_RAM = H(R, A, M)
+    EdDSA_HashRAM_Poseidon_gadget(
+            ProtoboardT& in_pb,
+            const VariablePointT& in_R,
+            const LinearCombinationT &in_A_x,
+            const VariableArrayT& in_M,
+            const std::string& annotation_prefix
+    );
+
+    void generate_r1cs_constraints();
+
+    void generate_r1cs_witness();
+
+    const VariableArrayT& result();
+};
+
 
 class PureEdDSA : public GadgetT
 {
@@ -151,6 +172,54 @@ public:
         const VariableArrayT& in_s,      // s
         const VariableArrayT& in_msg,    // m
         const std::string& annotation_prefix);
+
+    void generate_r1cs_constraints();
+
+    void generate_r1cs_witness();
+};
+
+class PureEdDSAPoseidon : public GadgetT
+{
+public:
+    PointValidator m_validator_R;           // IsValid(R)
+    fixed_base_mul m_lhs;                   // lhs = B*s
+    EdDSA_HashRAM_Poseidon_gadget m_hash_RAM;        // hash_RAM = H(R,A,M)
+    ScalarMult m_At;                        // A*hash_RAM
+    PointAdder m_rhs;                       // rhs = R + (A*hash_RAM)
+
+    PureEdDSAPoseidon(
+            ProtoboardT& in_pb,
+            const Params& in_params,
+            const EdwardsPoint& in_base,    // B
+            const VariablePointT& in_A,      // A
+            const VariablePointT& in_R,      // R
+            const VariableArrayT& in_s,      // s
+            const VariableArrayT& in_msg,    // m
+            const std::string& annotation_prefix);
+
+    void generate_r1cs_constraints();
+
+    void generate_r1cs_witness();
+};
+
+class PureEdDSAPoseidonFixed : public GadgetT
+{
+public:
+    PointValidator m_validator_R;           // IsValid(R)
+    fixed_base_mul_mg_3b m_lhs;                   // lhs = B*s
+    EdDSA_HashRAM_Poseidon_gadget m_hash_RAM;        // hash_RAM = H(R,A,M)
+    fixed_base_mul_mg_3b m_At;                        // A*hash_RAM
+    PointAdder m_rhs;                       // rhs = R + (A*hash_RAM)
+
+    PureEdDSAPoseidonFixed(
+            ProtoboardT& in_pb,
+            const Params& in_params,
+            const EdwardsPoint& in_base,    // B
+            const EdwardsPoint& in_A,      // A
+            const VariablePointT& in_R,      // R
+            const VariableArrayT& in_s,      // s
+            const VariableArrayT& in_msg,    // m
+            const std::string& annotation_prefix);
 
     void generate_r1cs_constraints();
 

@@ -23,7 +23,8 @@ namespace jubjub {
 class PedersenHash : public GadgetT
 {
 public:
-    fixed_base_mul_zcash m_commitment;
+    std::shared_ptr<fixed_base_mul_zcash> m_commitment;
+    VariableArrayT padded_bits;
 
     PedersenHash(
         ProtoboardT& in_pb,

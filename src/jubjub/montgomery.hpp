@@ -19,11 +19,11 @@ public:
 
     // First input point
     const LinearCombinationT m_X1;
-    const VariableT m_Y1;
+    const LinearCombinationT m_Y1;
 
     // Second input point
     const LinearCombinationT m_X2;
-    const VariableT m_Y2;
+    const LinearCombinationT m_Y2;
 
     // Intermediate variables
     const VariableT lambda;
@@ -34,9 +34,9 @@ public:
         ProtoboardT& in_pb,
         const Params& in_params,
         const LinearCombinationT in_X1,
-        const VariableT in_Y1,
+        const LinearCombinationT in_Y1,
         const LinearCombinationT in_X2,
-        const VariableT in_Y2,
+        const LinearCombinationT in_Y2,
         const std::string& annotation_prefix
     );
 

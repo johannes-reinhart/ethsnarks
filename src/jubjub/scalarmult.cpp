@@ -108,6 +108,15 @@ void ScalarMult::generate_r1cs_witness()
 
 	for( auto& gadget : adders )
 		gadget.generate_r1cs_witness();
+
+//    std::cout << "ScalarMult: " << this->annotation_prefix << std::endl;
+//    std::cout << "result: x=" << pb.val(this->result_x()) << " y=" << pb.val(this->result_y()) << std::endl;
+//    std::cout << "base: x=" << pb.val(doublers[0].m_X1) << " y=" << pb.val(doublers[0].m_Y1) << std::endl;
+//    std::cout << "scalar ";
+//    for (int i = 0; i < conditionals.size(); i++){
+//        std::cout << pb.lc_val(conditionals[i].m_bit);
+//    }
+//    std::cout << std::endl;
 }
 
 

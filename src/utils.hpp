@@ -22,6 +22,9 @@ int char2int( const char input );
 
 const VariableArrayT flatten( const std::vector<VariableArrayT> &in_scalars );
 
+const LinearCombinationArrayT flatten_lc(const LinearCombinationT &a, const LinearCombinationT &b, const LinearCombinationArrayT &in_scalars );
+
+
 std::vector<unsigned long> bit_list_to_ints(std::vector<bool> bit_list, const size_t wordsize);
 
 /**
@@ -54,6 +57,16 @@ inline std::vector<libsnark::linear_combination<FieldT> > VariableArrayT_to_lc( 
     return ret;
 }
 
+inline LinearCombinationArrayT VariableArrayT_to_pb_lc( const VariableArrayT& in_vars )
+{
+    LinearCombinationArrayT ret;
+    ret.reserve(in_vars.size());
+    for( const auto& var : in_vars ) {
+        ret.emplace_back(var);
+    }
+    return ret;
+}
+
 
 inline FieldT lc_val( const ProtoboardT& pb, const libsnark::linear_combination<FieldT>& in_lc )
 {
@@ -67,6 +80,17 @@ inline FieldT lc_val( const ProtoboardT& pb, const libsnark::linear_combination<
 
 
 inline std::vector<FieldT> vals( const ProtoboardT& pb, const std::vector<libsnark::linear_combination<FieldT> > &in_lcs )
+{
+    std::vector<FieldT> ret;
+    ret.reserve(in_lcs.size());
+    for( const auto &lc : in_lcs )
+    {
+        ret.emplace_back(lc_val(pb, lc));
+    }
+    return ret;
+}
+
+inline std::vector<FieldT> vals( const ProtoboardT& pb, const LinearCombinationArrayT &in_lcs )
 {
     std::vector<FieldT> ret;
     ret.reserve(in_lcs.size());

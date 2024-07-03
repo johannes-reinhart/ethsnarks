@@ -9,8 +9,8 @@
  * @copyright  MIT license (see LICENSE file)
  *****************************************************************************/
 
-#ifndef R1CS_GG_PPZKSNARK_PARAMS_HPP_
-#define R1CS_GG_PPZKSNARK_PARAMS_HPP_
+#ifndef R1CS_GG_PPZKSNARK_ZOK_PARAMS_HPP_
+#define R1CS_GG_PPZKSNARK_ZOK_PARAMS_HPP_
 
 #include <libff/algebra/curves/public_params.hpp>
 
@@ -33,4 +33,4 @@ using r1cs_gg_ppzksnark_zok_auxiliary_input = r1cs_auxiliary_input<libff::Fr<ppT
 
 } // libsnark
 
-#endif // R1CS_GG_PPZKSNARK_PARAMS_HPP_
+#endif // R1CS_GG_PPZKSNARK_ZOK_PARAMS_HPP_

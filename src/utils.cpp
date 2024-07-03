@@ -70,9 +70,10 @@ std::vector<unsigned long> bit_list_to_ints(std::vector<bool> bit_list, const si
 
 static FieldT bytes_to_FieldT( const uint8_t *in_bytes, const size_t in_count, int order )
 {
-    const unsigned n_bits_roundedup = FieldT::size_in_bits() + (8 - (FieldT::size_in_bits()%8));
+#ifndef NDEBUG
+    const unsigned n_bits_roundedup = FieldT::ceil_size_in_bits() + (8 - (FieldT::ceil_size_in_bits()%8));
     const unsigned n_bytes = n_bits_roundedup / 8;
-
+#endif
     assert( in_count <= n_bytes );
 
     // Import bytes as big-endian
@@ -260,6 +261,20 @@ const VariableArrayT flatten( const std::vector<VariableArrayT> &in_scalars )
     return result;
 }
 
+/**
+* Convert two numbers and an array of variables into a flat contiguous array of variables
+*/
+const LinearCombinationArrayT flatten_lc(const LinearCombinationT &a, const LinearCombinationT &b, const LinearCombinationArrayT &in_scalars )
+{
+    LinearCombinationArrayT result;
+    result.reserve(in_scalars.size() + 2);
+
+    result.push_back(a);
+    result.push_back(b);
+    result.insert(result.end(), in_scalars.begin(), in_scalars.end());
+
+    return result;
+}
 
 
 int char2int( const char input )
@@ -364,6 +379,8 @@ void dump_pb_r1cs_constraints(const ProtoboardT& pb)
         dump_r1cs_constraint(constraint, full_variable_assignment, cs.variable_annotations);
         printf("\n");
     }
+#else
+    UNUSED(pb);
 #endif
 }
 

@@ -32,10 +32,10 @@ void NotLowOrder::generate_r1cs_constraints()
 	m_doubler_8.generate_r1cs_constraints();
 	m_isnonzero.generate_r1cs_constraints();
 
-	pb.add_r1cs_constraint(
-        ConstraintT(
-            m_isnonzero.result(), 1, 1),
-            FMT(annotation_prefix, ".isnonzero == 1"));
+//	pb.add_r1cs_constraint(
+//        ConstraintT(
+//            m_isnonzero.result(), 1, 1),
+//            FMT(annotation_prefix, ".isnonzero == 1"));
 }
 
 
