@@ -17,3 +17,4 @@ lextab.py
 yacctab.py
 dist/
 *.egg-info/
+.idea
