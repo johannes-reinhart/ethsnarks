@@ -24,7 +24,7 @@ add_subdirectory(gadgets)
 add_subdirectory(jubjub)
 
 add_library(ethsnarks_crypto crypto/signatures/eddsa.cpp)
-target_link_libraries(ethsnarks_crypto ethsnarks_common ethsnarks_jubjub)
+target_link_libraries(ethsnarks_crypto ethsnarks_common ethsnarks_jubjub snark_crypto)
 
 if( NOT ${ETHSNARKS_DISABLE_PINOCCHIO} )
 	add_subdirectory(pinocchio)

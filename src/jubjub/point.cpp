@@ -1,6 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include <openssl/sha.h>
+#include <libsnark/common/crypto/digest/sha.hpp>
+
 #include "jubjub/point.hpp"
 #include "utils.hpp"
 
@@ -55,23 +56,20 @@ const EdwardsPoint EdwardsPoint::add(const EdwardsPoint& other, const Params& pa
 const EdwardsPoint EdwardsPoint::from_hash( void *in_bytes, size_t n, const Params& params )
 {
     // Hash input
-    SHA256_CTX ctx;
-    uint8_t output_digest[SHA256_DIGEST_LENGTH];
-    SHA256_Init(&ctx);
-    SHA256_Update(&ctx, in_bytes, n);
-    SHA256_Final(output_digest, &ctx);
+    auto *bytes = (uint8_t *) in_bytes;
+    std::vector<uint8_t> output_digest = libsnark::digest_sha256(std::vector<uint8_t>(bytes, bytes+n));
 
     // Convert output to MPZ
     mpz_t output_as_mpz;
     mpz_init(output_as_mpz);
     mpz_import(
         output_as_mpz,              // output
-        SHA256_DIGEST_LENGTH,       // count
+        output_digest.size(),       // count
         1,                          // order
         sizeof(output_digest[0]),   // size
         1,                          // endian (1, MSB first)
         0,                          // nails
-        output_digest);             // op
+        output_digest.data());      // op
 
     // On nano_jubjub, the scalar field is too small to fit the whole digest,
     // so we take the digest modulo the scalar field size

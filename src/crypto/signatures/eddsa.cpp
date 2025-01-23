@@ -6,31 +6,23 @@
  See eddsa.h
  *****************************************************************************/
 
-#include <openssl/sha.h>
+#include <libsnark/common/crypto/digest/sha.hpp>
+#include <utility>
 
 #include "eddsa.h"
 #include "jubjub/eddsa.hpp"
+
 
 using namespace libff;
 
 namespace ethsnarks {
 
 FieldR hash_secret(eddsa_private_key k, eddsa_msg_char msg){
-    std::vector<uint8_t> k_bytes = k.to_bytes();
-    unsigned char hash[SHA512_DIGEST_LENGTH];
-
-    SHA512_CTX sha512;
-    SHA512_Init(&sha512);
-    SHA512_Update(&sha512, &k_bytes[0], k_bytes.size());
     // Note: https://en.wikipedia.org/EdDSA calculates r differently: r = H(H_{b, ..., 2b-1}(k) || M)
     // This version here follows the python implementation in ethsnarks/ethsnarks/eddsa.py
-
-    SHA512_Update(&sha512, &msg[0], msg.size());
-    SHA512_Final(hash, &sha512);
-
-    std::vector<uint8_t> hash_v(std::begin(hash), std::end(hash));
+    std::vector<uint8_t> hash = libsnark::digest_sha512_chunks({k.to_bytes(), msg});
     FieldR r;
-    r.from_bytes(hash_v);
+    r.from_bytes(hash);
     return r;
 }
 
@@ -54,13 +46,7 @@ void append_bytes_to_bits(std::vector<bool> &bits, std::string bytes, size_t max
 
 Group1 point_from_hash(char* bytes, size_t n){
     // Hash input
-    SHA256_CTX ctx;
-    uint8_t output_digest[SHA256_DIGEST_LENGTH];
-    SHA256_Init(&ctx);
-    SHA256_Update(&ctx, bytes, n);
-    SHA256_Final(output_digest, &ctx);
-
-    std::vector<uint8_t> output_bytes(output_digest, output_digest+SHA256_DIGEST_LENGTH);
+    std::vector<uint8_t> output_bytes = libsnark::digest_sha256(std::vector<uint8_t>(bytes, bytes+n));
 
     FieldQ y;
     y.from_bytes(output_bytes, true); // This is big endian here (Why is this not consistent to hash_secret (little endian)?
