@@ -5,6 +5,8 @@
  *
  *****************************************************************************/
 
+#include <libsnark/common/crypto/signature/eddsa_poseidon.hpp>
+
 #include "depends/libff/libff/algebra/curves/alt_bn128/alt_bn128_g1.hpp"
 
 #include "crypto/signatures/eddsa.h"
@@ -62,6 +64,41 @@ namespace ethsnarks{
         return true;
     }
 
+    bool test_eddsa_sign_libsnark(size_t n){
+        const libsnark::DefaultPoseidonParameters params;
+        eddsa_private_key key;
+        eddsa_public_key A;
+
+        libsnark::eddsa_poseidon_privkey<default_inner_ec_pp> key_libsnark;
+        libsnark::eddsa_poseidon_pubkey<default_inner_ec_pp> A_libsnark;
+
+        for (size_t i = 0; i < n; i++) {
+            eddsa_generate_keypair(key, A);
+            key_libsnark = libsnark::eddsa_poseidon_privkey<default_inner_ec_pp>(key);
+            A_libsnark = libsnark::eddsa_poseidon_pubkey<default_inner_ec_pp>(A);
+
+            std::vector<FieldQ> message = {FieldQ(34), FieldQ(21), FieldQ(0), FieldQ(12142), FieldQ(1444),
+                FieldQ(i)};
+
+            EddsaSignature signature = eddsa_poseidon_sign(message, key);
+            libsnark::eddsa_poseidon_signature<default_inner_ec_pp> signature_libsnark = libsnark::eddsa_poseidon_sign<default_inner_ec_pp>(params, key_libsnark, message);
+
+            if (signature.s != signature_libsnark.s || signature.R != signature_libsnark.R)
+            {
+                return false;
+            }
+
+            bool verify = eddsa_poseidon_verify(message, signature, A);
+            bool verify_libsnark = libsnark::eddsa_poseidon_verify(params, A_libsnark, signature_libsnark, message);
+
+            if (!verify || !verify_libsnark){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }
 
 
@@ -76,5 +113,10 @@ int main(int argc, char **argv) {
     if (!ethsnarks::test_eddsa_sign(10)){
         std::cerr << "FAIL: eddsa sign" << std::endl;
         return 1;
+    }
+
+    if (!ethsnarks::test_eddsa_sign_libsnark(10)){
+        std::cerr << "FAIL: eddsa sign libsnark" << std::endl;
+        return 2;
     }
 }

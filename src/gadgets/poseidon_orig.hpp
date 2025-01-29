@@ -334,7 +334,7 @@ public:
 		Poseidon_gadget_T<SBox_gadget, param_t, param_c, param_F, param_P, nInputs, nOutputs, constrainOutputs> gadget(pb, var_inputs, "gadget");
 		gadget.generate_r1cs_witness();
 
-		/*
+/*
 		// Debugging statements
 		gadget.generate_r1cs_constraints();
 
@@ -342,39 +342,39 @@ public:
 		const auto first_outputs = gadget.first_round.outputs;
 		for( unsigned j = 0; j < first_outputs.size(); j++ ) {
 			std::cout << "o[" << i << "][" << j << "] = ";
-			pb.val(first_outputs[j]).print();
+			pb.lc_val(first_outputs[j]).print();
 		}
 		std::cout << std::endl;
 
-		for( const auto prefix_round : gadget.prefix_full_rounds )
+		for( const auto &prefix_round : gadget.prefix_full_rounds )
 		{
 			i += 1;
 			const auto outputs = prefix_round.outputs;
 			for( unsigned j = 0; j < outputs.size(); j++ ) {
 				std::cout << "o[" << i << "][" << j << "] = ";
-				pb.val(outputs[j]).print();
+				pb.lc_val(outputs[j]).print();
 			}
 		}
 		std::cout << std::endl;
 
-		for( const auto partial_round : gadget.partial_rounds )
+		for( const auto &partial_round : gadget.partial_rounds )
 		{
 			i += 1;
 			const auto outputs = partial_round.outputs;
 			for( unsigned j = 0; j < outputs.size(); j++ ) {
 				std::cout << "o[" << i << "][" << j << "] = ";
-				pb.val(outputs[j]).print();
+				pb.lc_val(outputs[j]).print();
 			}
 		}
 		std::cout << std::endl;
 
-		for( const auto suffix_round : gadget.suffix_full_rounds )
+		for( const auto &suffix_round : gadget.suffix_full_rounds )
 		{
 			i += 1;
 			const auto outputs = suffix_round.outputs;
 			for( unsigned j = 0; j < outputs.size(); j++ ) {
 				std::cout << "o[" << i << "][" << j << "] = ";
-				pb.val(outputs[j]).print();
+				pb.lc_val(outputs[j]).print();
 			}
 		}
 		std::cout << std::endl;
@@ -382,7 +382,7 @@ public:
 		const auto last_outputs = gadget.last_round.outputs;
 		for( unsigned j = 0; j < last_outputs.size(); j++ ) {
 			std::cout << "o[" << i << "][" << j << "] = ";
-			pb.val(last_outputs[j]).print();
+			pb.lc_val(last_outputs[j]).print();
 		}
 		std::cout << std::endl;
 
@@ -391,8 +391,8 @@ public:
 		}
 
 		std::cout << pb.num_constraints() << " constraints" << std::endl;
-		*/
-
+		// End debugging statements
+*/
 		return vals(pb, gadget.results());
 	}
 
@@ -549,8 +549,8 @@ public:
 
 
             for(size_t j=0; j<r; j++){
-                if(i*param_t+j < n_inputs) {
-                    lin_combs.push_back(linear_combination<FieldT>(inputs[i * param_t + j]));
+                if(i*r+j < n_inputs) {
+                    lin_combs.push_back(linear_combination<FieldT>(inputs[i * r + j]));
                 }else{
                     lin_combs.push_back(linear_combination<FieldT>(0)); // pad with zeros
                 }

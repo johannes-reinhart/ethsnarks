@@ -21,7 +21,7 @@
 
 namespace ethsnarks {
 
-    typedef libff::Fr<libff::default_ec_pp> FieldS; // outer curve scalar field
+    typedef libff::Fr<libff::default_ec_pp> FieldS; // outer curve scalar field, == FieldT
     typedef libff::Fr<default_inner_ec_pp> FieldR; // inner curve scalar field
     typedef libff::Fq<default_inner_ec_pp> FieldQ; // inner curve base field
     typedef libff::G1<default_inner_ec_pp> Group1; // inner curve group

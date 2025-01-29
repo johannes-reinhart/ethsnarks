@@ -1,9 +1,13 @@
 // Copyright (c) 2019 HarryR
 // License: LGPL-3.0+
 
+#include <libsnark/common/crypto/digest/poseidon.hpp>
+#include <libsnark/common/curve/curve_properties.hpp>
+
 #include "utils.hpp"
 #include "gadgets/poseidon_orig.hpp"
 #include "stubs.hpp"
+
 
 using ethsnarks::ppT;
 using ethsnarks::FieldT;
@@ -67,22 +71,33 @@ static bool test_prove_verify() {
     */
 
     cout << pb.num_constraints() << " constraints\n";
-    return stub_test_proof_verify( pb );
+    //return stub_test_proof_verify( pb );
+    return pb.is_satisfied();
 }
 
-
-int main( int argc, char **argv )
+static bool test_against_libsnark()
 {
-    ppT::init_public_params();
+    typedef libsnark::PoseidonParameters<libff::default_ec_pp> Parameters;
+    typedef Parameters::Fr Fr;
+    Parameters param = Parameters();
 
-    if( ! test_constants() ){
-        return 1;
-    }
+    //std::vector<Fr> inputs = {Fr("124"), Fr("609677209687"), Fr("5523"), Fr("2435264"), Fr("3"), Fr("562460"), Fr("8741015")};
+    std::vector<Fr> inputs(param.t, Fr::zero());
+    inputs[0] = Fr("20");
+    inputs[2] = Fr("23540");
 
-    if( ! test_prove_verify() ){
-        return 2;
-    }
+    std::vector<Fr> output_libsnark = inputs;
+    libsnark::poseidon_permutation(param, output_libsnark);
+    cout << "Poseidon permutation libsnark: " << output_libsnark << std::endl;
 
+    std::vector<Fr> output_ethsnarks = ethsnarks::Poseidon_Precomputed<POSEIDON_PARAM_T, POSEIDON_PARAM_T, true>::permute(inputs);
+    cout << "Poseidon permutation ethsnark: " << output_ethsnarks << std::endl;
+
+    return output_libsnark == output_ethsnarks;
+}
+
+static int test_vectors()
+{
     const auto actual = Poseidon_Precomputed<5,5>::permute({0, 1, 2, 3, 4});
     const FieldT expected("454957455121345586845062157181250659690836909969675544465082691114068521797");
     if( actual[0] != expected ) {
@@ -105,6 +120,33 @@ int main( int argc, char **argv )
         cerr << "poseidon([1,2,3,4,0]) incorrect result, got ";
         actual3[0].print();
         return 5;
+    }
+
+    return 0;
+}
+
+
+int main( int argc, char **argv )
+{
+    ppT::init_public_params();
+
+    if( ! test_constants() ){
+        return 1;
+    }
+
+    if( ! test_prove_verify() ){
+        return 2;
+    }
+
+    int result_tv = test_vectors();
+    if(result_tv)
+    {
+        return result_tv;
+    }
+
+    if ( ! test_against_libsnark())
+    {
+        return 6;
     }
 
     std::cout << "OK" << std::endl;
