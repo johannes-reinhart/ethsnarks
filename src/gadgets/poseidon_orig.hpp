@@ -166,11 +166,12 @@ public:
 		const std::vector<FieldT>& in_C_i,
 		const std::vector<FieldT>& in_M,
 		const LinearCombinationArrayT& in_state,
-		const std::vector<SBox_gadget>& in_sboxes )
+		const std::vector<SBox_gadget>& in_sboxes,
+		unsigned output_offset)
 	{
         LinearCombinationArrayT ret;
 
-		for( unsigned i = 0; i < nOutputs; i++ )
+		for( unsigned i = output_offset; i < nOutputs + output_offset; i++ )
 		{
 			const unsigned M_offset = i * param_t;
 
@@ -211,9 +212,10 @@ public:
 		const std::vector<FieldT> in_C_i, // The ethsnarks implementation only assigns one round constant to each round, but it should be t according to paper
 		const std::vector<FieldT>& in_M,
 		const VariableArrayT& in_state,
+		unsigned output_offset,
 		const std::string& annotation_prefix
 	) :
-		Poseidon_Round(in_pb, in_C_i, in_M, VariableArrayT_to_lc(in_state), annotation_prefix)
+		Poseidon_Round(in_pb, in_C_i, in_M, VariableArrayT_to_lc(in_state), output_offset, annotation_prefix)
 	{ }
 
 	Poseidon_Round(
@@ -221,6 +223,7 @@ public:
 		const std::vector<FieldT> in_C_i,
 		const std::vector<FieldT>& in_M,
 		const LinearCombinationArrayT& in_state,
+		unsigned output_offset,
 		const std::string& annotation_prefix
 	) :
 		GadgetT(in_pb, annotation_prefix),
@@ -228,7 +231,7 @@ public:
 		M(in_M),
 		state(in_state),
 		sboxes(make_sboxes(in_pb, annotation_prefix)),
-		outputs(make_outputs(in_pb, in_C_i, in_M, in_state, sboxes))
+		outputs(make_outputs(in_pb, in_C_i, in_M, in_state, sboxes, output_offset))
 	{
 		assert( nInputs <= param_t );
 		assert( nOutputs <= param_t );
@@ -318,7 +321,7 @@ public:
 		for( unsigned i = n_begin; i < n_end; i++ )
 		{
 			const auto& state = (i == n_begin) ? inputs : result.back().outputs;
-			result.emplace_back(pb, std::vector<FieldT>(constants.C.begin()+i*param_t, constants.C.begin()+(i+1)*param_t), constants.M, state, FMT(annotation_prefix, ".round[%u]", i));
+			result.emplace_back(pb, std::vector<FieldT>(constants.C.begin()+i*param_t, constants.C.begin()+(i+1)*param_t), constants.M, state, 0, FMT(annotation_prefix, ".round[%u]", i));
 		}
 
 		return result;
@@ -331,7 +334,7 @@ public:
 		assert( inputs.size() == nInputs );
 		auto var_inputs = make_var_array(pb, "input", inputs);
 
-		Poseidon_gadget_T<SBox_gadget, param_t, param_c, param_F, param_P, nInputs, nOutputs, constrainOutputs> gadget(pb, var_inputs, "gadget");
+		Poseidon_gadget_T<SBox_gadget, param_t, param_c, param_F, param_P, nInputs, nOutputs, constrainOutputs> gadget(pb, var_inputs, 0, "gadget");
 		gadget.generate_r1cs_witness();
 
 /*
@@ -399,12 +402,13 @@ public:
 	Poseidon_gadget_T(
 		ProtoboardT &pb,
 		const LinearCombinationArrayT& in_inputs,
+		unsigned output_offset,
 		const std::string& annotation_prefix
 	) :
 		GadgetT(pb, annotation_prefix),
 		inputs(in_inputs),
 		constants(poseidon_params<param_t, param_F, param_P>()),
-		first_round(pb, std::vector<FieldT>(constants.C.begin(), constants.C.begin()+param_t), constants.M, in_inputs, FMT(annotation_prefix, ".round[0]")),
+		first_round(pb, std::vector<FieldT>(constants.C.begin(), constants.C.begin()+param_t), constants.M, in_inputs, 0, FMT(annotation_prefix, ".round[0]")),
 		prefix_full_rounds(
 			make_rounds<FullRoundT>(
 				1, partial_begin, pb,
@@ -417,7 +421,7 @@ public:
 			make_rounds<FullRoundT>(
 				partial_end, total_rounds-1, pb,
 				partial_rounds.back().outputs, constants, annotation_prefix)),
-		last_round(pb, std::vector<FieldT>(constants.C.end()-param_t, constants.C.end()), constants.M, suffix_full_rounds.back().outputs, FMT(annotation_prefix, ".round[%u]", total_rounds-1)),
+		last_round(pb, std::vector<FieldT>(constants.C.end()-param_t, constants.C.end()), constants.M, suffix_full_rounds.back().outputs, output_offset, FMT(annotation_prefix, ".round[%u]", total_rounds-1)),
 		_output_vars(constrainOutputs ? make_var_array(pb, nOutputs, ".output") : VariableArrayT())
 	{
                 assert(param_t == POSEIDON_PARAM_T);
@@ -548,15 +552,15 @@ public:
             //in_inputs = LinearCombinationArrayT();
 
 
+        	for(size_t j=0; j<param_c; j++){
+        		lin_combs.push_back(linear_combination<FieldT>(0));
+        	}
             for(size_t j=0; j<r; j++){
                 if(i*r+j < n_inputs) {
                     lin_combs.push_back(linear_combination<FieldT>(inputs[i * r + j]));
                 }else{
                     lin_combs.push_back(linear_combination<FieldT>(0)); // pad with zeros
                 }
-            }
-            for(size_t j=r; j<param_t; j++){
-                lin_combs.push_back(linear_combination<FieldT>(0));
             }
 
             // inner permutation, add output from previous permutation
@@ -577,10 +581,11 @@ public:
             if (i < n_permutations - 1) {
                 permutations.push_back(PoseidonPermutation(pb,
                                                            lcs,
+                                                           0,
                                                            FMT(annotation_prefix, ".perm%d", i)));
             }else{
                 // last permutation
-                last_permutation.reset(new LastPoseidonPermutation(pb, lcs, FMT(annotation_prefix, ".perm%d", i)));
+                last_permutation.reset(new LastPoseidonPermutation(pb, lcs, param_c, FMT(annotation_prefix, ".perm%d", i)));
             }
             
         }

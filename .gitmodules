@@ -10,3 +10,6 @@
 [submodule "depends/libfqfft"]
 	path = depends/libfqfft
 	url = ../libfqfft.git
+[submodule "depends/libff"]
+	path = depends/libff
+	url = ../libff.git

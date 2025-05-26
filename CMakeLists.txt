@@ -62,7 +62,7 @@ set(
 
 set(
   DEPENDS_DIR_LIBSNARK
-  "${CMAKE_CURRENT_SOURCE_DIR}/depends/libsnark/"
+  "${DEPENDS_DIR}/libsnark/"
   CACHE
   STRING
   "Optionally specify the dependency installation directory relative to the source directory (default: inside dependency folder)"
@@ -70,7 +70,7 @@ set(
 
 set(
   DEPENDS_DIR_LIBFF
-  "${DEPENDS_DIR_LIBSNARK}/depends/libff/"
+  "${DEPENDS_DIR}/libff/"
   CACHE
   STRING
   "Optionally specify the dependency installation directory relative to the source directory (default: inside dependency folder)"
@@ -240,43 +240,22 @@ else()
   add_definitions(-DNO_PROCPS)
 endif()
 
-
-add_library(
-  ff
-  STATIC
-
-  ${DEPENDS_DIR_LIBFF}/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp
-  ${DEPENDS_DIR_LIBFF}/libff/algebra/curves/alt_bn128/alt_bn128_g2.cpp
-  ${DEPENDS_DIR_LIBFF}/libff/algebra/curves/alt_bn128/alt_bn128_init.cpp
-  ${DEPENDS_DIR_LIBFF}/libff/algebra/curves/alt_bn128/alt_bn128_pairing.cpp
-  ${DEPENDS_DIR_LIBFF}/libff/algebra/curves/alt_bn128/alt_bn128_pp.cpp
-  ${DEPENDS_DIR_LIBFF}/libff/common/double.cpp
-  ${DEPENDS_DIR_LIBFF}/libff/common/profiling.cpp
-  ${DEPENDS_DIR_LIBFF}/libff/common/utils.cpp
-)
-
-target_include_directories(ff PUBLIC
-  ${GMP_INCLUDE_DIR}
-  ${DEPENDS_DIR_LIBSNARK} ${DEPENDS_DIR_LIBFF} ${DEPENDS_DIR_LIBFQFFT})
-
-set_property(TARGET ff PROPERTY CXX_STANDARD 11)
-
-
 if("${DEBUG}" OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   add_definitions(-DDEBUG=1)
-  target_compile_definitions(ff PUBLIC DEBUG=1)
 endif()
-
-target_include_directories(ff INTERFACE
-  ${GMP_INCLUDE_DIR}
-  ${DEPENDS_DIR_LIBSNARK} ${DEPENDS_DIR_LIBFF} ${DEPENDS_DIR_LIBFQFFT})
-
-
-target_link_libraries(ff ${GMP_LIBRARY} ${PROCPS_LIBRARIES})
 
 if(OpenMP_CXX_FOUND)
     target_link_libraries(ff OpenMP::OpenMP_CXX)
 endif()
 
+# Add a `make check` target that builds and tests
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+
+include_directories(depends/libsnark/)
+include_directories(depends/libff)
+include_directories(depends/libfqfft)
+
 add_subdirectory(src)
 add_subdirectory(depends)
+
+

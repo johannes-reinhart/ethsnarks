@@ -24,7 +24,7 @@ using std::cerr;
 static bool test_constants( ) {
     ProtoboardT pb;
     const auto inputs = make_var_array(pb, 2, "input");
-    Poseidon_Precomputed<4,5> p(pb, inputs, "gadget");
+    Poseidon_Precomputed<4,5> p(pb, inputs, 0, "gadget");
 
     struct constant_test {
         const char *name;
@@ -57,7 +57,7 @@ static bool test_prove_verify() {
 
     auto var_inputs = make_var_array(pb, "input", {1, 2, 3, 4});
 
-    Poseidon_Precomputed<4,5> the_gadget(pb, var_inputs, "gadget");
+    Poseidon_Precomputed<4,5> the_gadget(pb, var_inputs, 0, "gadget");
     the_gadget.generate_r1cs_witness();
     the_gadget.generate_r1cs_constraints();
     if( ! pb.is_satisfied() ) {

@@ -19,3 +19,12 @@ target_include_directories(
     INTERFACE
     ${DEPENDS_DIR}/json/single_include/
 )
+
+OPTION(IS_LIBFF_PARENT OFF)
+add_subdirectory(libff)
+
+OPTION(IS_LIBFQFFT_PARENT OFF)
+add_subdirectory(libfqfft)
+
+add_subdirectory(libsnark/libsnark)
+
